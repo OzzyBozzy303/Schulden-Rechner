@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Schulden-Tracker</title>
+  <title>Schulden-Tracker Dark</title>
   <style>
     :root {
-      --bg: #f9fafb;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --primary: #2563eb;
-      --primary-dark: #1e40af;
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
       --warn: #f59e0b;
       --success: #22c55e;
       --danger: #ef4444;
-      --border: #e5e7eb;
+      --border: #334155;
     }
     * { box-sizing: border-box; }
     body {
@@ -25,16 +25,17 @@
     header {
       background: var(--primary); color:#fff;
       padding:1rem; text-align:center; font-size:1.3rem; font-weight:bold;
-      box-shadow:0 2px 6px rgba(0,0,0,0.1);
+      box-shadow:0 2px 6px rgba(0,0,0,0.4);
     }
     .container { max-width:900px; margin:auto; padding:1rem; }
     .card {
       background: var(--card); border-radius:12px; padding:1rem; margin-bottom:1rem;
-      border:1px solid var(--border); box-shadow:0 2px 6px rgba(0,0,0,0.05);
+      border:1px solid var(--border); box-shadow:0 2px 6px rgba(0,0,0,0.3);
     }
+    h2 { margin-top:0; color: var(--primary); }
     input, select, textarea, button {
       padding:0.8rem; border-radius:8px; border:1px solid var(--border);
-      font-size:1rem; width:100%;
+      font-size:1rem; width:100%; background:#0f172a; color:var(--text);
     }
     textarea { resize: vertical; }
     button {
@@ -43,13 +44,13 @@
     }
     button:hover { background: var(--primary-dark); }
     .list .item {
-      background: var(--bg); border-radius:10px; padding:0.8rem; margin-bottom:0.6rem;
+      background: #0f172a; border-radius:10px; padding:0.8rem; margin-bottom:0.6rem;
       border:1px solid var(--border);
     }
     .status.offen { color: var(--warn); font-weight:bold; }
     .status.bezahlt { color: var(--success); font-weight:bold; }
     .person-card {
-      background: var(--bg); border-radius:10px; padding:0.8rem; margin-bottom:0.6rem;
+      background: #0f172a; border-radius:10px; padding:0.8rem; margin-bottom:0.6rem;
       border:1px solid var(--border);
     }
     .score-badge {
@@ -58,10 +59,11 @@
     .score-bad { background:rgba(239,68,68,0.15); color:var(--danger); }
     .score-avg { background:rgba(245,158,11,0.15); color:var(--warn); }
     .score-good { background:rgba(34,197,94,0.15); color:var(--success); }
+    .muted { color: var(--muted); font-size:0.9rem; }
   </style>
 </head>
 <body>
-  <header>📊 Schulden-Tracker</header>
+  <header>🌙 Schulden-Tracker Dark</header>
 
   <div class="container">
     <div class="card">
@@ -91,7 +93,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "debts_v3";
+    const STORAGE_KEY = "debts_dark_v1";
     let debts = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
     const form = document.getElementById("debtForm");
@@ -122,7 +124,7 @@
         div.innerHTML = `
           <strong>${d.name}</strong> – ${d.amount.toFixed(2)} €<br>
           <span class="status ${d.status}">${d.status}</span> | ${d.date || ""}<br>
-          Notiz: ${d.note || ""}
+          <span class="muted">Notiz: ${d.note || ""}</span>
         `;
         list.appendChild(div);
       });
