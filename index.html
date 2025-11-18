@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Schulden-Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f0f4f8;
+      color: #1f2937;
+    }
+    header {
+      background: #4f46e5;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 1rem;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    input, select, textarea, button {
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+    }
+    button {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { background: #4338ca; }
+    .list .item {
+      background: #fff;
+      border-radius: 10px;
+      padding: 0.8rem;
+      margin-bottom: 0.6rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .status.offen { color: #ef4444; font-weight: bold; }
+    .status.bezahlt { color: #22c55e; font-weight: bold; }
+    .actions { display: flex; gap: 0.4rem; margin-top: 0.5rem; }
+    .actions button {
+      flex: 1;
+      font-size: 0.85rem;
+      padding: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>📱 Schulden-Tracker</header>
+  <div class="container">
+    <div class="card">
+      <form id="debtForm">
+        <input type="text" id="name" placeholder="Name" required />
+        <input type="number" id="amount" placeholder="Betrag (€)" required />
+        <input type="date" id="date" />
+        <select id="status">
+          <option value="offen">Offen</option>
+          <option value="bezahlt">Bezahlt</option>
+        </select>
+        <textarea id="note" placeholder="Notiz"></textarea>
+        <button type="submit">➕ Hinzufügen</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Übersicht</h3>
+      <div class="list" id="list"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "debts_pwa";
+    let debts = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+    const form = document.getElementById("debtForm");
+    const list = document.getElementById("list");
+
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const debt = {
+        id: Date.now(),
+        name: document.getElementById("name").value,
+        amount: parseFloat(document.getElementById("amount").value),
+        date: document.getElementById("date").value,
+        status: document.getElementById("status").value,
+        note: document.getElementById("note").value
+      };
+      debts.push(debt);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(debts));
+      form.reset();
+      render();
+    });
+
+    function render() {
+      list.innerHTML = "";
+      debts.forEach(d => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <div class="item-header">
+            <span><strong>${d.name}</strong> – ${d.amount.toFixed(2)} €</span>
+            <span class="status ${d.status}">${d.status}</span>
+          </div>
+          <div>${d.date || ""}</div>
+          <div>${d.note || ""}</div>
+          <div class="actions">
+            <button onclick="toggleStatus(${d.id})">Status ändern</button>
+            <button onclick="removeDebt(${d.id})">Löschen</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function toggleStatus(id) {
+      debts = debts.map(d => d.id === id ? {...d, status: d.status === "offen" ? "bezahlt" : "offen"} : d);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(debts));
+      render();
+    }
+
+    function removeDebt(id) {
+      debts = debts.filter(d => d.id !== id);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(debts));
+      render();
+    }
+
+    render();
+
+    // Service Worker Registrierung
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js")
+        .then(() => console.log("Service Worker registriert"))
+        .catch(err => console.error("SW Fehler:", err));
+    }
+  </script>
+</body>
+</html>
