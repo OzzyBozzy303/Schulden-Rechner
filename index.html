@@ -5,61 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Schulden-Tracker Dark</title>
   <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --text: #f1f5f9;
-      --muted: #94a3b8;
-      --primary: #3b82f6;
-      --primary-dark: #1d4ed8;
-      --warn: #f59e0b;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --border: #334155;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin:0; font-family: "Inter", Arial, sans-serif;
-      background: var(--bg); color: var(--text);
-    }
-    header {
-      background: var(--primary); color:#fff;
-      padding:1rem; text-align:center; font-size:1.3rem; font-weight:bold;
-      box-shadow:0 2px 6px rgba(0,0,0,0.4);
-    }
+    body { margin:0; font-family:Arial, sans-serif; background:#0f172a; color:#f1f5f9; }
+    header { background:#3b82f6; color:#fff; padding:1rem; text-align:center; font-size:1.3rem; font-weight:bold; }
     .container { max-width:900px; margin:auto; padding:1rem; }
-    .card {
-      background: var(--card); border-radius:12px; padding:1rem; margin-bottom:1rem;
-      border:1px solid var(--border); box-shadow:0 2px 6px rgba(0,0,0,0.3);
-    }
-    h2 { margin-top:0; color: var(--primary); }
+    .card { background:#1e293b; border-radius:12px; padding:1rem; margin-bottom:1rem; }
     input, select, textarea, button {
-      padding:0.8rem; border-radius:8px; border:1px solid var(--border);
-      font-size:1rem; width:100%; background:#0f172a; color:var(--text);
+      padding:0.8rem; border-radius:8px; border:1px solid #334155;
+      font-size:1rem; width:100%; background:#0f172a; color:#f1f5f9;
     }
-    textarea { resize: vertical; }
-    button {
-      background: var(--primary); color:#fff; border:none; cursor:pointer; font-weight:600;
-      transition: background 0.2s ease;
-    }
-    button:hover { background: var(--primary-dark); }
-    .list .item {
-      background: #0f172a; border-radius:10px; padding:0.8rem; margin-bottom:0.6rem;
-      border:1px solid var(--border);
-    }
-    .status.offen { color: var(--warn); font-weight:bold; }
-    .status.bezahlt { color: var(--success); font-weight:bold; }
-    .person-card {
-      background: #0f172a; border-radius:10px; padding:0.8rem; margin-bottom:0.6rem;
-      border:1px solid var(--border);
-    }
-    .score-badge {
-      padding:4px 10px; border-radius:999px; font-size:0.85rem; font-weight:bold;
-    }
-    .score-bad { background:rgba(239,68,68,0.15); color:var(--danger); }
-    .score-avg { background:rgba(245,158,11,0.15); color:var(--warn); }
-    .score-good { background:rgba(34,197,94,0.15); color:var(--success); }
-    .muted { color: var(--muted); font-size:0.9rem; }
+    button { background:#3b82f6; color:#fff; border:none; cursor:pointer; font-weight:600; }
+    button:hover { background:#1d4ed8; }
+    .item { background:#0f172a; border-radius:10px; padding:0.8rem; margin-bottom:0.6rem; border:1px solid #334155; }
+    .status.offen { color:#f59e0b; font-weight:bold; }
+    .status.bezahlt { color:#22c55e; font-weight:bold; }
+    .person-card { background:#0f172a; border-radius:10px; padding:0.8rem; margin-bottom:0.6rem; border:1px solid #334155; }
+    .score-badge { padding:4px 10px; border-radius:999px; font-size:0.85rem; font-weight:bold; }
+    .score-bad { background:rgba(239,68,68,0.15); color:#ef4444; }
+    .score-avg { background:rgba(245,158,11,0.15); color:#f59e0b; }
+    .score-good { background:rgba(34,197,94,0.15); color:#22c55e; }
   </style>
 </head>
 <body>
@@ -67,17 +30,17 @@
 
   <div class="container">
     <div class="card">
-      <h2>Neue Schuld erfassen</h2>
+      <h2>Neue Schuld / Rückzahlung</h2>
       <form id="debtForm">
         <input type="text" id="name" placeholder="Name" required />
-        <input type="number" id="amount" placeholder="Betrag (€)" required />
+        <input type="number" id="amount" placeholder="Betrag (z.B. 50 oder -20)" required />
         <input type="date" id="date" />
         <select id="status">
           <option value="offen">Offen</option>
           <option value="bezahlt">Bezahlt</option>
         </select>
-        <textarea id="note" placeholder="Notiz"></textarea>
-        <button type="submit">➕ Hinzufügen</button>
+        <textarea id="note" placeholder="Notiz (z.B. Rückzahlung)"></textarea>
+        <button type="submit">➕ Speichern</button>
       </form>
     </div>
 
@@ -93,7 +56,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "debts_dark_v1";
+    const STORAGE_KEY = "debts_dark_v2";
     let debts = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
     const form = document.getElementById("debtForm");
@@ -124,7 +87,7 @@
         div.innerHTML = `
           <strong>${d.name}</strong> – ${d.amount.toFixed(2)} €<br>
           <span class="status ${d.status}">${d.status}</span> | ${d.date || ""}<br>
-          <span class="muted">Notiz: ${d.note || ""}</span>
+          <span style="color:#94a3b8;">${d.note || ""}</span>
         `;
         list.appendChild(div);
       });
@@ -133,10 +96,9 @@
       people.innerHTML = "";
       const grouped = {};
       debts.forEach(d => {
-        if (!grouped[d.name]) grouped[d.name] = {offen:0, bezahlt:0, items:[]};
+        if (!grouped[d.name]) grouped[d.name] = {sum:0, items:[]};
         grouped[d.name].items.push(d);
-        if (d.status==="bezahlt") grouped[d.name].bezahlt += d.amount;
-        else grouped[d.name].offen += d.amount;
+        grouped[d.name].sum += d.amount; // negative Beträge reduzieren die Summe
       });
       Object.keys(grouped).forEach(name=>{
         const info = grouped[name];
@@ -148,9 +110,9 @@
             <strong>${name}</strong>
             <span class="score-badge ${score.cls}">Score: ${score.val}/100</span>
           </div>
-          <div>Offen: ${info.offen.toFixed(2)} € | Bezahlt: ${info.bezahlt.toFixed(2)} €</div>
+          <div>Offen gesamt: ${info.sum.toFixed(2)} €</div>
           ${info.items.map(i=>`
-            <div style="border-top:1px dashed var(--border);margin-top:6px;padding-top:6px;">
+            <div style="border-top:1px dashed #334155;margin-top:6px;padding-top:6px;">
               ${i.amount.toFixed(2)} € (${i.status}) – ${i.note||""} ${i.date||""}
             </div>`).join("")}
         `;
@@ -160,11 +122,10 @@
 
     function calcScore(info){
       let score=50;
-      if(info.offen===0) score+=25;
-      else if(info.offen<50) score+=15;
-      else if(info.offen<200) score+=5;
+      if(info.sum<=0) score+=25; // keine offenen Schulden oder schon zurückgezahlt
+      else if(info.sum<50) score+=15;
+      else if(info.sum<200) score+=5;
       else score-=10;
-      score+=Math.min(20, info.bezahlt/10);
       score=Math.max(0,Math.min(100,Math.round(score)));
       let cls="score-avg";
       if(score<40) cls="score-bad";
